@@ -1,19 +1,18 @@
-tw2.d3
-======
+tw2.captcha
+===========
 
 :Author: Pierre-Yves Chibon <pingou@pingoured.fr>
 
 .. comment: split here
 
 .. _toscawidgets2 (tw2): http://toscawidgets.org/documentation/tw2.core/
-.. _d3: http://mbostock.github.com/d3/
 
 tw2.captcha is a `toscawidgets2 (tw2)`_ captcha plugin
 
 Live Demo
 ---------
 
-Peep the `live demonstration <http://tw2-demos.threebean.org/module?module=tw2.d3>`_.
+Peep the `live demonstration <http://tw2-demos.threebean.org/module?module=tw2.captcha>`_.
 
 Links
 -----
@@ -45,9 +44,9 @@ To give it a try you'll need git, mercurial, python, and virtualenv.  Run::
     $ git clone git://github.com/pypingou/tw2.captcha.git
     $ cd tw2.captcha
     $ mkvirtualenv tw2.captcha
-    (tw2.d3) $ pip install tw2.devtools
-    (tw2.d3) $ python setup.py develop
-    (tw2.d3) $ paster tw2.browser
+    (tw2.captcha) $ pip install tw2.devtools
+    (tw2.captcha) $ python setup.py develop
+    (tw2.captcha) $ paster tw2.browser
 
 ...and browse to http://localhost:8000/ to check it out.
 
