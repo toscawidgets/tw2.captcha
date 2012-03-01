@@ -12,6 +12,9 @@ font_size_min = Captcha.text_font_size_min
 font_size_max = Captcha.text_font_size_max
 
 captcha.font__paths = [Captcha.text_font_path]
+for font_path in captcha.font__paths:
+    assert os.path.exists(font_path), \
+            'The font_path "%s" does not exist' % (font_path,)
 captcha.captcha__text__render_mode = Captcha.text_render_mode
 captcha.captcha__font_range = (font_size_min, font_size_max)
 

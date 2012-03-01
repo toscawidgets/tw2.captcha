@@ -15,12 +15,10 @@ from pkg_resources import iter_entry_points
 
 modname = '.'.join(__name__.split('.')[:-1])
 
-class CaptchaWidget(twc.Widget):
+
+class Captcha(twc.Widget):
     template = "mako:tw2.captcha.templates.captcha"
-
-
-class Captcha(CaptchaWidget):
-    resources = CaptchaWidget.resources + [
+    resources = [
         twc.CSSLink(modname=modname, filename="static/ext/captcha.css"),
     ]
 
@@ -37,6 +35,8 @@ class Captcha(CaptchaWidget):
     timeout = twc.Param("Time in minutes during which the captcha will be valid.",
         default=5)
 
+    controller_prefix = twc.Param("URL prefix of captcha controller",
+                                  default="/tw2.captcha/")
     picture_width = twc.Param("Picture width in pixel.", default=300)
     picture_height = twc.Param("Picture width in pixel.", default=100)
     picture_bg_color = twc.Param('Picture background color.', default='#DDDDDD')
@@ -46,8 +46,10 @@ class Captcha(CaptchaWidget):
         'Minimal font size for the text on the captcha.', default=30)
     text_font_size_max = twc.Param(
         'Maximal font size for the text on the captcha.', default=45)
-    text_font_path = twc.Param('Full path to the font to be used in for the text.',
-        default= 'tw2/captcha/static/fonts/tuffy/Tuffy.ttf')
+    text_font_path = twc.Param(
+        'Full path to the font to be used in for the text.  ' +
+        'Either relative to the package or absolute.',
+        default='static/fonts/tuffy/Tuffy.ttf')
     text_render_mode = twc.Param('Rendering method for the text.',
         default='by_letter')
     ascii_char = twc.Param('Character allowed in the ascii text',
@@ -59,6 +61,13 @@ class Captcha(CaptchaWidget):
     stop_range = twc.Param('For the equation, maximum number allowed',
         default=100)
 
+    payload = twc.Variable("Internally used hash of the captcha.")
+
+    @classmethod
+    def post_define(cls):
+        if not cls.text_font_path[0] == os.path.sep:
+            base = os.path.sep.join(__file__.split(os.path.sep)[:-1])
+            cls.text_font_path = base + os.path.sep + cls.text_font_path
 
     def prepare(self):
 
@@ -92,9 +101,9 @@ class Captcha(CaptchaWidget):
         for ep in iter_entry_points('tw2.captcha.text_generators', txt_gen):
             self.text_generator = ep.load()
 
-        payload = self.create_payload()
-        print "********************", payload
-        image = self.image(payload)
+        self.payload = self.create_payload()
+        print "********************", self.payload
+        image = self.image(self.payload)
 
     def image(self, value):
         "Serve a jpeg for the given payload value."
