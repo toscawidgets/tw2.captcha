@@ -3,6 +3,7 @@ tw2 widgets that provides text or audio captcha.
 """
 
 import tw2.core as twc
+import tw2.forms as twf
 
 import base64
 import model
@@ -18,25 +19,34 @@ from pkg_resources import iter_entry_points
 
 modname = '.'.join(__name__.split('.')[:-1])
 
+captcha_css = twc.CSSLink(modname=modname, filename="static/ext/captcha.css")
+captcha_img = twc.DirLink(modname=modname, filename="static/images/")
 
-class Captcha(twc.Widget):
+class Captcha(twf.InputField):
     template = "mako:tw2.captcha.templates.captcha"
-    resources = [
-        twc.CSSLink(modname=modname, filename="static/ext/captcha.css"),
-    ]
+    resources = [captcha_css, captcha_img]
 
     key = twc.Param(
         "Random string unique for your site with which the captcha is generated.",
         default="CHANGEME")
     _key = twc.Variable("Used internally.")
+
     audio = twc.Param("Boolean to enable or not audio captcha.",
         default=True)
+    audio_icon = twc.Param(
+        "URL for an audio icon.",
+        default="/resources/tw2.captcha/static/images/gnome_audio_volume_medium.png",
+    )
+
     jpeg_generator = twc.Param(
-        "Algorithm used to render the captcha image. Options:vanasco_dowty, mcdermott",
+        "Algorithm used to render the captcha image.  " +
+        "Options:vanasco_dowty, mcdermott",
         default='vanasco_dowty')
-    text_generator = twc.Param("Text displayed on the captcha image.",
+    text_generator = twc.Param(
+        "Text displayed on the captcha image.",
         default='random_ascii')
-    timeout = twc.Param("Time in minutes during which the captcha will be valid.",
+    timeout = twc.Param(
+        "Time in minutes during which the captcha will be valid.",
         default=5)
 
     controller_prefix = twc.Param("URL prefix of captcha controller",
@@ -112,14 +122,14 @@ class Captcha(twc.Widget):
 
         sub_controllers = {
             'image': cls.request_image,
-            'sound': cls.request_sound,
+            'audio': cls.request_audio,
         }
         stream, content_type = sub_controllers[directive](payload)
         resp = webob.Response(app_iter=stream, content_type=content_type)
         return resp
 
     @classmethod
-    def request_sound(cls, payload):
+    def request_audio(cls, payload):
         """ Returns raw binary audio and the content type """
         raise NotImplementedError("Haven't written this one yet.")
 
