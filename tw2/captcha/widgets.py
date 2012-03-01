@@ -48,7 +48,7 @@ class Captcha(CaptchaWidget):
         'Maximal font size for the text on the captcha.', default=45)
     text_font_path = twc.Param('Full path to the font to be used in for the text.',
         default= 'tw2/captcha/static/fonts/tuffy/Tuffy.ttf')
-    text_render_mode = twc.Param('Rendering method for the text.', 
+    text_render_mode = twc.Param('Rendering method for the text.',
         default='by_letter')
     ascii_char = twc.Param('Character allowed in the ascii text',
         default='BCDEFGHJKLMNPQRTUVWXYacdefhijkmnprstuvwxyz378')

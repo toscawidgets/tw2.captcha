@@ -5,7 +5,7 @@ import os
 from pkg_resources import resource_filename
 from tw2.captcha.widgets import Captcha
 
-# get the font path 
+# get the font path
 font_path = Captcha.text_font_path
 assert os.path.exists(font_path), \
        'The font_path "%s" does not exist' % (font_path,)
@@ -23,7 +23,7 @@ def generate_jpeg(text, file_obj):
     interval = font_size
     lineNum = rand(5, 15)
     font = ImageFont.truetype(font_path, font_size)
-    
+
     # Create a background -----------------------------------------
     bg_color = rand(0xbb, 0xee)
     image = Image.new('RGB', (img_w, img_h), (bg_color, bg_color, bg_color))
@@ -49,7 +49,7 @@ def generate_jpeg(text, file_obj):
 
 	image.paste(charImg, (hpos, vpos), mask)
 	image.paste(charImg, (hpos+1, vpos+1), mask)
-        
+
     image = image.filter(ImageFilter.SHARPEN)
 
     # Draw few lines -----------------------------------------
@@ -59,7 +59,7 @@ def generate_jpeg(text, file_obj):
                    rand(1, img_w), rand(1, img_h)),
                   fill=rand(0x666666, 0x999999)
                   )
-        
+
     image.save(file_obj, format='JPEG')
 
 if __name__ == "__main__":

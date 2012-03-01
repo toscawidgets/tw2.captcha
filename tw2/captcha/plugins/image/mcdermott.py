@@ -25,7 +25,7 @@ def generate_jpeg(text, file_obj):
     fgcolor = random.randint(0,0xffff00)
     # make the background color the opposite of fgcolor
     bgcolor = fgcolor ^ 0xffffff
-    # create a font object 
+    # create a font object
     font = ImageFont.truetype(font_path, text_font_size_min)
     # determine dimensions of the text
     dim = font.getsize(text)

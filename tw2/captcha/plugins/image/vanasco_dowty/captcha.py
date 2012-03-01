@@ -4,57 +4,57 @@ Classes to implement a Captcha system in TurboGears
 
 (c) 2006 jonathan vanasco <jvanasco@gmail.com>
 
-Based in part on 
-    "PyCAPTCHA Package Copyright (C) 2004 Micah Dowty <micah@navi.cx>" 
-        *   _PyCaptcha_ prefaced classes are directly from that library (with a 
+Based in part on
+    "PyCAPTCHA Package Copyright (C) 2004 Micah Dowty <micah@navi.cx>"
+        *   _PyCaptcha_ prefaced classes are directly from that library (with a
             few naming adjustments)
-        *   other items are influenced by it, including the 'layering' idea.  
+        *   other items are influenced by it, including the 'layering' idea.
         Full Resource - http://svn.navi.cx/misc/trunk/pycaptcha/
     "Human verification test (captcha) by Robert McDermott 2005/09/21"
-        Full Resource - http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/440588 
-        
+        Full Resource - http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/440588
+
 Licensing:
 
 Copyright (c) 2006 Jonathan Vanasco
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
 so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all 
+The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 The PyCaptcha Sections have licensing as follows:
 
 Copyright (c) 2004 Micah Dowty
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
 so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all 
+The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
@@ -64,7 +64,7 @@ try:
 except ImportError:
     from md5 import new as md5_constructor
 import random
-import math 
+import math
 import os
 import time
 
@@ -106,7 +106,7 @@ class _ErrorLoggingObject(object):
         if function not in self._errors:
             return None
         return self._errors[function]
-    
+
     def set_error( self , function , error ):
         self._errors[function] = error
 
@@ -117,7 +117,7 @@ class _Captcha(_ErrorLoggingObject) :
         self.captcha_text = None
         self.captcha_seed = captcha_seed
         self._errors = {}
-    
+
     def generate_key(self):
         """Generates a key that can be used to ( generate a captcha ) or ( validate a captcha )"""
         self.captcha_time_start = int(time.time())
@@ -160,7 +160,7 @@ class CaptchaExisting( _Captcha ):
         self.time_now = int(time.time())
 
     def is_timely( self ):
-    
+
         # is the captcha too old?
         if self.time_now > ( self.captcha_time_start + captcha__expiry_time) :
             self.set_error('is_timely','EXPIRED captcha time')
@@ -175,13 +175,13 @@ class CaptchaExisting( _Captcha ):
 
     def validate( self , user_text=None ):
         """Validates a text against the key/time"""
-        
+
         self.success = False
-        
+
         if not self.is_timely() :
             self.set_error('validate',self.get_error('is_timely'))
             return 0
-        
+
         if user_text == self.generate_captcha_text():
             self.success = True
             return 1
@@ -192,12 +192,12 @@ class CaptchaExisting( _Captcha ):
 
     def generate_image( self ):
         """Generate a captcha image"""
-        
-        
+
+
         t_start = time.time()
-        
+
         captcha_text = self.captcha_text
-        if captcha_text is None:  
+        if captcha_text is None:
             captcha_text = self.generate_captcha_text()
 
         img_color_bg = self.img_color_bg
@@ -209,7 +209,7 @@ class CaptchaExisting( _Captcha ):
         if not self.is_timely() :
             img = _Captcha__ImgExpired( width=self.img_width , height=self.img_height , color_bg=img_color_bg )
         else:
-           img = _Captcha__Img( 
+           img = _Captcha__Img(
                 text = captcha_text,
                 width=self.img_width,
                 height=self.img_height,
@@ -247,7 +247,7 @@ class _Captcha__ImgExpired:
         """Render this CAPTCHA, returning a PIL image"""
         size = (self.width,self.height)
         img = Image.new("RGB", size )
-        
+
         #first the bg
         img.paste( self.color_bg )
 
@@ -256,17 +256,17 @@ class _Captcha__ImgExpired:
         text_dimensions = font.getsize(captcha__img_expired__text)
 
         draw = ImageDraw.Draw(img)
-        draw.text( 
+        draw.text(
             (
                 ((self.width - text_dimensions[0])/2) ,
-                ((self.height - text_dimensions[1])/2) 
-            ) , 
+                ((self.height - text_dimensions[1])/2)
+            ) ,
             captcha__img_expired__text, font=font, fill=self.color_fg
         )
         self._image = img
         return self._image
-        
-        
+
+
 class _Captcha__Img:
     def __init__( self, text="Error! No Text Supplied" , width=captcha__img_width , height=captcha__img_height , font_size = random.randint(captcha__font_range[0],captcha__font_range[1]) , color_fg="#000000" , color_bg="#FFFFFF"):
         self.text = text
@@ -281,7 +281,7 @@ class _Captcha__Img:
             _Captcha__Img__lines(color=self.color_fg , canvas_width=width , canvas_height=height),
             _PyCaptcha_SineWarp(amplitudeRange = (4, 8) , periodRange=(0.65,0.73) ),
         ]
-        
+
     def getImg(self):
         """Get a PIL image representing this CAPTCHA test, creating it if necessary"""
         if not self._image:
@@ -296,7 +296,7 @@ class _Captcha__Img:
             img = layer.render( img ) or img
         self._image = img
         return self._image
-        
+
 
 
 class _Captcha__bg( _Captcha__Img ):
@@ -329,13 +329,13 @@ class _Captcha__Img__text( _Captcha__Img ):
         font = ImageFont.truetype(  *_PyCaptcha_FontFactory().pick() )
         text_dimensions = [ int(1.2 * i) for i in font.getsize(self.text) ]
         letter_width = text_dimensions[0] / len(self.text)
-        
+
         startX = int( random.randint(5,(self.canvas_width - text_dimensions[0]-5)) )
         startY = int( random.randint(5,(self.canvas_height - text_dimensions[1]-5)) )
 
         draw = ImageDraw.Draw(img)
         for letter_index in range( 0 , len(self.text)):
-            draw.text( 
+            draw.text(
                 (
                     (startX + (letter_index * letter_width )),
                     (startY + ( random.randint(-10,10) )),
@@ -344,8 +344,8 @@ class _Captcha__Img__text( _Captcha__Img ):
                 font = ImageFont.truetype(  *_PyCaptcha_FontFactory().pick() ),
                 fill = self.color
             )
-        
-        
+
+
     def render__whole_word(self, img):
         """Renders text onto the img"""
         font = ImageFont.truetype(  *_PyCaptcha_FontFactory().pick() )
@@ -354,11 +354,11 @@ class _Captcha__Img__text( _Captcha__Img ):
         draw = ImageDraw.Draw(img)
 
         r = random.randint
-        draw.text( 
+        draw.text(
             (
-                r(5,(self.canvas_width - text_dimensions[0]-5)) , 
-                r(5,(self.canvas_height - text_dimensions[1]-5)) 
-            ), 
+                r(5,(self.canvas_width - text_dimensions[0]-5)) ,
+                r(5,(self.canvas_height - text_dimensions[1]-5))
+            ),
             self.text, font=font, fill=self.color
         )
 
@@ -382,16 +382,16 @@ class _Captcha__Img__lines( _Captcha__Img ):
                 random.randint((.5*self.canvas_width),(2*self.canvas_width)),
                 random.randint((.5*self.canvas_height),(2*self.canvas_height))
             )
-            draw.arc( ( bbox1 , bbox2 , bbox3 , bbox4 ) , a1 , a2,fill=self.color) 
+            draw.arc( ( bbox1 , bbox2 , bbox3 , bbox4 ) , a1 , a2,fill=self.color)
             #randomly we'll draw some lines thicker.  this is accomplished by shifting the bounding box a bit in each direction
             if random.randint(0,100) > 50:
-                #draw.arc( ( bbox1+1 , bbox2+1 , bbox3 , bbox4 ) , a1 , a2,fill=self.color) 
-                #draw.arc( ( bbox1 , bbox2 , bbox3-1 , bbox4-1 ) , a1 , a2,fill=self.color) 
+                #draw.arc( ( bbox1+1 , bbox2+1 , bbox3 , bbox4 ) , a1 , a2,fill=self.color)
+                #draw.arc( ( bbox1 , bbox2 , bbox3-1 , bbox4-1 ) , a1 , a2,fill=self.color)
                 # random.randint is out thickness
                 for i in range (1 , random.randint(2,3) ):
-                    draw.arc( ( bbox1+i , bbox2+i , bbox3 , bbox4 ) , a1 , a2,fill=self.color) 
-                    draw.arc( ( bbox1 , bbox2 , bbox3+i , bbox4+i ) , a1 , a2,fill=self.color) 
-                
+                    draw.arc( ( bbox1+i , bbox2+i , bbox3 , bbox4 ) , a1 , a2,fill=self.color)
+                    draw.arc( ( bbox1 , bbox2 , bbox3+i , bbox4+i ) , a1 , a2,fill=self.color)
+
         # little arcs
         for i in range( 1 , random.randint(5,15) ):
             ( a1 , a2 ) = ( random.randint(0,360) , random.randint(0,360) )
@@ -403,16 +403,16 @@ class _Captcha__Img__lines( _Captcha__Img ):
                 bbox1 + random.randint(0,40),
                 bbox2 + random.randint(0,40)
             )
-            draw.arc( ( bbox1 , bbox2 , bbox3 , bbox4 ) , a1 , a2,fill=self.color) 
+            draw.arc( ( bbox1 , bbox2 , bbox3 , bbox4 ) , a1 , a2,fill=self.color)
             #randomly we'll draw some lines thicker.  this is accomplished by shifting the bounding box a bit in each direction
             if random.randint(0,100) > 50:
-                #draw.arc( ( bbox1+1 , bbox2+1 , bbox3 , bbox4 ) , a1 , a2,fill=self.color) 
-                #draw.arc( ( bbox1 , bbox2 , bbox3-1 , bbox4-1 ) , a1 , a2,fill=self.color) 
+                #draw.arc( ( bbox1+1 , bbox2+1 , bbox3 , bbox4 ) , a1 , a2,fill=self.color)
+                #draw.arc( ( bbox1 , bbox2 , bbox3-1 , bbox4-1 ) , a1 , a2,fill=self.color)
                 # random.randint is out thickness
                 for i in range (1 , random.randint(2,3) ):
-                    draw.arc( ( bbox1+i , bbox2 , bbox3+i , bbox4 ) , a1 , a2,fill=self.color) 
-                    draw.arc( ( bbox1-i , bbox2 , bbox3-i , bbox4 ) , a1 , a2,fill=self.color) 
-         
+                    draw.arc( ( bbox1+i , bbox2 , bbox3+i , bbox4 ) , a1 , a2,fill=self.color)
+                    draw.arc( ( bbox1-i , bbox2 , bbox3-i , bbox4 ) , a1 , a2,fill=self.color)
+
         # and a few lines
         for i in range( 1 , random.randint(5,15) ):
             ( bbox1 , bbox2 ) = (
@@ -423,12 +423,12 @@ class _Captcha__Img__lines( _Captcha__Img ):
                 bbox1 + random.randint(0,40),
                 bbox2 + random.randint(0,40)
             )
-            draw.line( ( bbox1 , bbox2 , bbox3 , bbox4 ) ,fill=self.color) 
+            draw.line( ( bbox1 , bbox2 , bbox3 , bbox4 ) ,fill=self.color)
             #randomly we'll draw some lines thicker.  this is accomplished by shifting the bounding box a bit in each direction
             if random.randint(0,100) > 50:
                 for i in range (1 , random.randint(3,6) ):
-                    draw.line( ( bbox1+i , bbox2+i , bbox3 , bbox4 ) , fill=self.color) 
-                    draw.line( ( bbox1 , bbox2 , bbox3+i , bbox4+i ) , fill=self.color) 
+                    draw.line( ( bbox1+i , bbox2+i , bbox3 , bbox4 ) , fill=self.color)
+                    draw.line( ( bbox1 , bbox2 , bbox3+i , bbox4+i ) , fill=self.color)
 
 
 class _PyCaptcha_WarpBase(object):
@@ -498,14 +498,14 @@ class _PyCaptcha_SineWarp(_PyCaptcha_WarpBase):
         self.period = random.uniform(*periodRange)
         self.offset = (random.uniform(0, math.pi * 2 / self.period),
                        random.uniform(0, math.pi * 2 / self.period))
-                       
+
     def get_transform(self, image):
         return (lambda x, y,
                 a = self.amplitude,
                 p = self.period,
                 o = self.offset:
                 (math.sin( (y+o[0])*p )*a + x,
-                 math.sin( (x+o[1])*p )*a + y))    
+                 math.sin( (x+o[1])*p )*a + y))
 
 class _PyCaptcha_FontFactory(object):
     """Picks random fonts and/or sizes from a given list.

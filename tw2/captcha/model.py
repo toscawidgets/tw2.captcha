@@ -5,13 +5,13 @@ import cPickle
 
 class Captcha(object):
     """Pertinent data about a Captcha.
-    
+
     Exposed properties are:
-    plaintext: (read/write) a string representing the text of the captcha 
+    plaintext: (read/write) a string representing the text of the captcha
                 (i.e. what is it supposed to say)
-    created: (read only) the UTC date when the captcha was created. This 
+    created: (read only) the UTC date when the captcha was created. This
                 data is updated when the plaintext property is updated.
-                
+
     Exposed methods:
     serialize(): returns a binary representation of the object
     deseralize(obj): creates a Captcha object given the output of the
@@ -43,8 +43,8 @@ class Captcha(object):
 
     def serialize(self):
         """Get a serialized binary representation of the object."""
-        # Serializing to a tuple containing the data elements instead of 
-        # just pickling the object is being done because the tuple 
+        # Serializing to a tuple containing the data elements instead of
+        # just pickling the object is being done because the tuple
         # pickle is much smaller than the pickled object itself.
         secs = int(calendar.timegm(self.created.utctimetuple()))
         t = (self.plaintext, secs, self.label)
