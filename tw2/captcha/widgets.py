@@ -95,14 +95,6 @@ class Captcha(CaptchaWidget):
         payload = self.create_payload()
         print "********************", payload
         image = self.image(payload)
-        self.add_call(twc.js_function('tw2.captcha')(
-            self.attrs['id'],
-            json,
-            self.width,
-            self.height,
-            self.padding,
-            self.fmtstr,
-        ))
 
     def image(self, value):
         "Serve a jpeg for the given payload value."
