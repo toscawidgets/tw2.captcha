@@ -2,4 +2,4 @@ dev/
 *.pyc
 *~
 *.egg*
-
+*.swp
