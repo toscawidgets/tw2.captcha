@@ -9,6 +9,8 @@ import base64
 import model
 import os
 import random
+import subprocess as sp  # omg
+import tempfile
 import urllib2
 import webob
 
@@ -120,24 +122,39 @@ class Captcha(twf.InputField):
         nothing, prefix, directive, payload = req.path.split('/')
         assert(prefix == cls.controller_prefix)
 
+        payload = urllib2.unquote(payload)
+        scp = cls.model_from_payload(payload)
+
         sub_controllers = {
             'image': cls.request_image,
             'audio': cls.request_audio,
         }
-        stream, content_type = sub_controllers[directive](payload)
+        stream, content_type = sub_controllers[directive](scp)
         resp = webob.Response(app_iter=stream, content_type=content_type)
         return resp
 
     @classmethod
-    def request_audio(cls, payload):
+    def request_audio(cls, scp):
         """ Returns raw binary audio and the content type """
-        raise NotImplementedError("Haven't written this one yet.")
+
+        # FIXME -- how dangerous is this, running Popen from a webapp?
+
+        fd, filename = tempfile.mkstemp('.wav')
+        try:
+            cmd = ['espeak', '%s' % scp.label, '-w', '%s' % filename]
+            proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE)
+            output, error = proc.communicate()
+        except Exception, err:
+            print "ERROR: %s" % err
+        f = open(filename)
+        f.seek(0)
+        content = f.read()
+        os.remove(filename)
+        return content, 'audio/basic'
 
     @classmethod
-    def request_image(cls, payload):
+    def request_image(cls, scp):
         """ Returns a raw binary image and the content type """
-        payload = urllib2.unquote(payload)
-        scp = cls.model_from_payload(payload)
         f = StringIO()
         if scp.label is not None and scp.label != None:
             cls.load_jpeg_generator()(scp.label, f)
