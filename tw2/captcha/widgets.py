@@ -98,12 +98,6 @@ class Captcha(twf.InputField):
         random.seed()
         cls.aes = AES.new(cls._key, AES.MODE_ECB)
 
-        # Register our widget's built-in controller with the middleware
-        # This allows subsequent requests (for the image and the audio) to make
-        # their way to this widget's `request` method.
-        mw = twc.core.request_local()['middleware']
-        mw.controllers.register(cls, cls.controller_prefix)
-
     @classmethod
     def load_jpeg_generator(cls):
         name = cls.jpeg_generator
@@ -192,6 +186,12 @@ class Captcha(twf.InputField):
             self.text_generator = ep.load()
 
         self.payload = self.create_payload()
+
+        # Register our widget's built-in controller with the middleware
+        # This allows subsequent requests (for the image and the audio) to make
+        # their way to this widget's `request` method.
+        mw = twc.core.request_local()['middleware']
+        mw.controllers.register(type(self), self.controller_prefix)
 
     def create_payload(self):
         "Create a payload that uniquely identifies the captcha."
