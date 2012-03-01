@@ -8,6 +8,9 @@ import base64
 import model
 import os
 import random
+import urllib2
+import webob
+
 from Crypto.Cipher import AES
 from cStringIO import StringIO
 from sha import new as sha_constructor
@@ -24,7 +27,8 @@ class Captcha(twc.Widget):
 
     key = twc.Param(
         "Random string unique for your site with which the captcha is generated.",
-        default=None)
+        default="CHANGEME")
+    _key = twc.Variable("Used internally.")
     audio = twc.Param("Boolean to enable or not audio captcha.",
         default=True)
     jpeg_generator = twc.Param(
@@ -36,7 +40,7 @@ class Captcha(twc.Widget):
         default=5)
 
     controller_prefix = twc.Param("URL prefix of captcha controller",
-                                  default="/tw2.captcha/")
+                                  default="__tw2_captcha__")
     picture_width = twc.Param("Picture width in pixel.", default=300)
     picture_height = twc.Param("Picture width in pixel.", default=100)
     picture_bg_color = twc.Param('Picture background color.', default='#DDDDDD')
@@ -65,17 +69,85 @@ class Captcha(twc.Widget):
 
     @classmethod
     def post_define(cls):
+        # Modify the text_font_path, allowing either relative or absolutely
+        # pathed font paths.
         if not cls.text_font_path[0] == os.path.sep:
             base = os.path.sep.join(__file__.split(os.path.sep)[:-1])
             cls.text_font_path = base + os.path.sep + cls.text_font_path
 
-    def prepare(self):
-
         # Check the types of everything
-        if self.key == None:
+        if cls.key == None:
             raise ValueError("Captcha must be provided a `key` parameter")
-        if self.jpeg_generator == None:
+        if cls.jpeg_generator == None:
             raise ValueError("Captcha must have a jpeg_generator")
+
+        # Set up our key and aes.
+        cls._key = sha_constructor(cls.key).hexdigest()[:32]
+        random.seed()
+        cls.aes = AES.new(cls._key, AES.MODE_ECB)
+
+        # Register our widget's built-in controller with the middleware
+        # This allows subsequent requests (for the image and the audio) to make
+        # their way to this widget's `request` method.
+        mw = twc.core.request_local()['middleware']
+        mw.controllers.register(cls, cls.controller_prefix)
+
+    @classmethod
+    def load_jpeg_generator(cls):
+        name = cls.jpeg_generator
+        for ep in iter_entry_points('tw2.captcha.jpeg_generators', name):
+            return ep.load()
+
+    @classmethod
+    def request(cls, req):
+        """ When a widget is first served, :meth:`prepare` and :meth:`display`
+        are called which produce the HTML embedded on the page - the captcha.
+
+        That embedding produces one or more subsequent requests for the actual
+        image (and potentially some audio).  Those requests make their way here.
+        """
+
+        nothing, prefix, directive, payload = req.path.split('/')
+        assert(prefix == cls.controller_prefix)
+
+        sub_controllers = {
+            'image': cls.request_image,
+            'sound': cls.request_sound,
+        }
+        stream, content_type = sub_controllers[directive](payload)
+        resp = webob.Response(app_iter=stream, content_type=content_type)
+        return resp
+
+    @classmethod
+    def request_sound(cls, payload):
+        """ Returns raw binary audio and the content type """
+        raise NotImplementedError("Haven't written this one yet.")
+
+    @classmethod
+    def request_image(cls, payload):
+        """ Returns a raw binary image and the content type """
+        payload = urllib2.unquote(payload)
+        scp = cls.model_from_payload(payload)
+        f = StringIO()
+        if scp.label is not None and scp.label != None:
+            cls.load_jpeg_generator()(scp.label, f)
+        else:
+            cls.load_jpeg_generator()(scp.plaintext, f)
+        f.seek(0)
+        res = f.read()
+        return res, 'image/jpeg'
+
+    @classmethod
+    def model_from_payload(cls, ascii_payload):
+        """ Convert a payload to a SCPayload object. """
+        enc = base64.urlsafe_b64decode(ascii_payload)
+        s = cls.aes.decrypt(enc)
+        s = s.rstrip('X')
+        return model.Captcha.deserialize(s)
+
+    def prepare(self):
+        """ Called just before the widget is displayed. """
+
         if self.text_generator == None:
             raise ValueError("Captcha must have a text_generator")
         int(self.start_range)
@@ -86,35 +158,13 @@ class Captcha(twc.Widget):
         int(self.picture_height)
         int(self.text_font_size_max)
         int(self.text_font_size_min)
-        print self.key
 
-        self.key = sha_constructor(self.key).hexdigest()[:32]
-        random.seed()
-        self.aes = AES.new(self.key, AES.MODE_ECB)
-        # find the jpeg generator
-        jpeg_gen = self.jpeg_generator
-        print "**", self.jpeg_generator, self.text_generator, self.key
-        for ep in iter_entry_points('tw2.captcha.jpeg_generators', jpeg_gen):
-            self.jpeg_generator = ep.load()
         # find the text generator
         txt_gen = self.text_generator
         for ep in iter_entry_points('tw2.captcha.text_generators', txt_gen):
             self.text_generator = ep.load()
 
         self.payload = self.create_payload()
-        print "********************", self.payload
-        image = self.image(self.payload)
-
-    def image(self, value):
-        "Serve a jpeg for the given payload value."
-        scp = self.model_from_payload(value)
-        f = StringIO()
-        if scp.label is not None and scp.label != None:
-            self.jpeg_generator(scp.label, f)
-        else:
-            self.jpeg_generator(scp.plaintext, f)
-        f.seek(0)
-        return f.read()
 
     def create_payload(self):
         "Create a payload that uniquely identifies the captcha."
@@ -124,16 +174,10 @@ class Captcha(twc.Widget):
              c.label = "%i + %i =" % (c.plaintext[0], c.plaintext[1])
              c.plaintext = str(c.plaintext[0] + c.plaintext[1])
         s = c.serialize()
+
         # pad shortfall with multiple Xs
         if len(s) % 16:
             pad = (16 - (len(s) % 16)) * 'X'
             s = "".join((s, pad))
-        enc = self.aes.encrypt(s)
+        enc = type(self).aes.encrypt(s)
         return base64.urlsafe_b64encode(enc)
-
-    def model_from_payload(self, ascii_payload):
-        "Convert a payload to a SCPayload object."
-        enc = base64.urlsafe_b64decode(ascii_payload)
-        s = self.aes.decrypt(enc)
-        s = s.rstrip('X')
-        return model.Captcha.deserialize(s)
