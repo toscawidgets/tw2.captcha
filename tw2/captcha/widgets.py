@@ -19,12 +19,14 @@ from cStringIO import StringIO
 from sha import new as sha_constructor
 from pkg_resources import iter_entry_points
 
+from tw2.captcha.validators import CaptchaValidator
+
 modname = '.'.join(__name__.split('.')[:-1])
 
 captcha_css = twc.CSSLink(modname=modname, filename="static/ext/captcha.css")
 captcha_img = twc.DirLink(modname=modname, filename="static/images/")
 
-class Captcha(twf.InputField):
+class Captcha(twf.TextField):
     template = "mako:tw2.captcha.templates.captcha"
     resources = [captcha_css, captcha_img]
 
@@ -98,6 +100,9 @@ class Captcha(twf.InputField):
         random.seed()
         cls.aes = AES.new(cls._key, AES.MODE_ECB)
 
+        # Set up our validator with a reference back to us.
+        cls.validator = CaptchaValidator(captcha_widget=cls)
+
     @classmethod
     def load_jpeg_generator(cls):
         name = cls.jpeg_generator
@@ -140,6 +145,7 @@ class Captcha(twf.InputField):
             output, error = proc.communicate()
         except Exception, err:
             print "ERROR: %s" % err
+
         f = open(filename)
         f.seek(0)
         content = f.read()
@@ -168,7 +174,6 @@ class Captcha(twf.InputField):
 
     def prepare(self):
         """ Called just before the widget is displayed. """
-
         if self.text_generator == None:
             raise ValueError("Captcha must have a text_generator")
         int(self.start_range)
@@ -192,6 +197,8 @@ class Captcha(twf.InputField):
         # their way to this widget's `request` method.
         mw = twc.core.request_local()['middleware']
         mw.controllers.register(type(self), self.controller_prefix)
+
+        super(Captcha, self).prepare()
 
     def create_payload(self):
         "Create a payload that uniquely identifies the captcha."

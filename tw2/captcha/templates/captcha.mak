@@ -7,5 +7,11 @@
 		<img src="${w.audio_icon}" alt="Audio file" />
 	</a>
 % endif
-	<input type="text" ${tw.attrs(attrs=w.attrs)}/>
+	<input type="hidden"
+		id="${w.attrs['id']}:payload"
+		name="${w.attrs['id']}:payload"
+		value="${w.payload}"/>
+	<input type="text"
+		id="${w.attrs['id']}:value"
+		name="${w.attrs['id']}:value"/>
 </span>
