@@ -2,6 +2,7 @@ tw2.captcha
 ===========
 
 :Author: Pierre-Yves Chibon <pingou@pingoured.fr>
+:Author: Ralph Bean <rbean@redhat.com>
 
 .. comment: split here
 
