@@ -17,7 +17,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] < 7:
 
 setup(
     name='tw2.captcha',
-    version='0.0.1',
+    version='0.0.2',
     description='toscawidgets2 captcha plugin',
     long_description=long_description,
     author='Pierre-Yves Chibon',

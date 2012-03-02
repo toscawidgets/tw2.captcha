@@ -18,8 +18,8 @@ Peep the `live demonstration <http://tw2-demos.threebean.org/module?module=tw2.c
 Links
 -----
 
-You can `get the source from github <http://github.com/pypingou/tw2.captcha>`_,
-report or look into `bugs <http://github.com/pypingou/tw2.captcha/issues/>`_.
+You can `get the source from github <http://github.com/ralphbean/tw2.captcha>`_,
+report or look into `bugs <http://github.com/ralphbean/tw2.captcha/issues/>`_.
 
 Description
 -----------
@@ -42,7 +42,7 @@ check out ``tw2.captcha/tw2/captcha/samples.py``
 
 To give it a try you'll need git, mercurial, python, and virtualenv.  Run::
 
-    $ git clone git://github.com/pypingou/tw2.captcha.git
+    $ git clone git://github.com/ralphbean/tw2.captcha.git
     $ cd tw2.captcha
     $ mkvirtualenv tw2.captcha
     (tw2.captcha) $ pip install tw2.devtools
