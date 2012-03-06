@@ -22,7 +22,7 @@ setup(
     long_description=long_description,
     author='Ralph Bean',
     author_email='rbean@redhat.com',
-    url='http://github.com/ralphbean/tw2.captcha',
+    url='http://github.com/toscawidgets/tw2.captcha',
     install_requires=[
         "tw2.core",
         "pycrypto",
