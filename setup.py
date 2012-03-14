@@ -7,6 +7,8 @@ f.close()
 
 install_requires=[
     "tw2.core",
+    "pycrypto",
+    "kitchen",
 ]
 
 import sys
