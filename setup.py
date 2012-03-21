@@ -8,6 +8,7 @@ f.close()
 install_requires=[
     "tw2.core",
     "pycrypto",
+    "PIL",
     "kitchen",
 ]
 
@@ -25,11 +26,7 @@ setup(
     author='Ralph Bean',
     author_email='rbean@redhat.com',
     url='http://github.com/toscawidgets/tw2.captcha',
-    install_requires=[
-        "tw2.core",
-        "pycrypto",
-        "PIL",
-    ],
+    install_requires=install_requires,
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages = ['tw2'],
     zip_safe=False,
