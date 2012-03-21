@@ -8,6 +8,7 @@ f.close()
 install_requires=[
     "tw2.core",
     "pycrypto",
+    "PIL",
     "kitchen",
 ]
 
@@ -19,17 +20,13 @@ if sys.version_info[0] == 2 and sys.version_info[1] < 7:
 
 setup(
     name='tw2.captcha',
-    version='0.0.3',
+    version='0.0.4',
     description='toscawidgets2 captcha plugin',
     long_description=long_description,
     author='Ralph Bean',
     author_email='rbean@redhat.com',
-    url='http://github.com/ralphbean/tw2.captcha',
-    install_requires=[
-        "tw2.core",
-        "pycrypto",
-        "PIL",
-    ],
+    url='http://github.com/toscawidgets/tw2.captcha',
+    install_requires=install_requires,
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages = ['tw2'],
     zip_safe=False,
