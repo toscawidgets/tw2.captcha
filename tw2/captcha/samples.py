@@ -18,4 +18,3 @@ class DemoCaptcha(Captcha):
 
     jpeg_generator = 'vanasco_dowty'
     text_generator = 'random_equation'
-
